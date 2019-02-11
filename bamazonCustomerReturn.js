@@ -6,8 +6,6 @@ var inquirer = require('inquirer');
 var keys = require("./keys.js");
 
 // globals
-var productArr = [];
-var numItemsInStock;
 var quantity;
 
 // create DB connection
@@ -16,14 +14,13 @@ var connection = mysql.createConnection({
     port: 3306,
     user: "root",
     password: process.env.mysql_passwd,
-    //password: "MYSQL4thewin!",
     database: "bamazon_db"
 });
 
 // test db connection
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
+    // console.log("connected as id " + connection.threadId + "\n");
 
 });
 

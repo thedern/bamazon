@@ -2,9 +2,6 @@ require("dotenv").config();
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 
-// keys exports object that contains mysql password
-var keys = require("./keys.js");
-
 // globals
 var quantity;
 
@@ -27,7 +24,7 @@ var connection = mysql.createConnection({
 // test db connection
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
+    // console.log("connected as id " + connection.threadId + "\n");
 
 });
 
