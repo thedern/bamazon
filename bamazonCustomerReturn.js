@@ -7,7 +7,8 @@ var keys = require("./keys.js");
 
 // globals
 var productArr = [];
-
+var numItemsInStock;
+var quantity;
 
 // create DB connection
 var connection = mysql.createConnection({
@@ -29,7 +30,20 @@ connection.connect(function(err) {
 /* ==========================================================================
    SQL Statements
    ========================================================================== */
- 
+   function findQuanity(product) {
+    console.log('finding product\n');
+    let sqlP= 'select stock_quantity from products where ?';
+    let input = {product_name: product};
+    connection.query(sqlP, input,(err, results) => {
+        if(err) {
+            throw err;
+        } else {
+            console.log('results are ', results)
+            return results;
+            
+        }
+    });
+};
 
 // display items and quantities
 function readProducts() { 
@@ -86,64 +100,24 @@ function mainPrompt() {
             }
             console.log('\nplease enter a number')
             return false;
-          } // end validation
+            
+          }
         } 
         ]).then((answer2) => {
-            
-            console.log('finding product\n');
-            let sqlP = 'select stock_quantity, price from products where ?';
-            let input = {product_name: answer.product};
-            connection.query(sqlP, input,(err, results) => {
-                if(err) {
-                    throw err;
-                } else {
-                    // capture quantity in stock and price per item
-                    for (key in results) {
-                        var quantity = results[key].stock_quantity;
-                        var itemPrice = results[key].price;
-                    } // end for loop
+            quantity = findQuanity(answer.product);
+            console.log('quantity is', quantity);
+            // if (answer2.number > quantity) {
+            //     console.log(`insufficent quantity to fill request.\nnumber in stock: ${quantity}\n\n\n`);
+            //     // send user back to main
+            //     mainPrompt();
+            // }
 
-                    // evaluate quantity
-                    if (answer2.number > quantity) {
-                        console.log(`insufficent quantity to fill request.\nnumber in stock: ${quantity}\nplease select again item\n\n`);
-                        //send user back to main
-                        mainPrompt();      
-                    } else {
-                        
-                        // calculate amounte owed
-                        let amtOwed = answer2.number * itemPrice;
-                        // subtract purchased from total quantity
-                        let diff = quantity - answer2.number;
-                    
-                        // update database quantity
-                        console.log(`filling order of ${answer2.number} ${answer.product}...`);
-                        let sqlU = 'update products set ? where ?';
-                        let input1 = {stock_quantity: diff};
-                        let input2 = {product_name: answer.product};
-                        connection.query(sqlU,[input1, input2],(err, results) => {
-                            if(err) {
-                                throw err;
-                            } else {
-                                console.log(`total due for (${answer2.number}) ${answer.product} is $${amtOwed}.\n\n`);
-                                mainPrompt();
-                            }
-                        }); // end query
-        
-                    } // end evaluate quantity
-
-                } // end conditional
-            
-            }); // end quanity search query
-               
         }); // end inner prompt
 
     }); // end outer prompt
+}
 
-} // end mainPrompt()
-
-/* ==========================================================================
-   Start
-   ========================================================================== */
+// display current products
 readProducts();
 
 
