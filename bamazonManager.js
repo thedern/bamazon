@@ -4,6 +4,7 @@ var inquirer = require('inquirer');
 
 // globals
 var quantity;
+var productArr = [];
 
 /*
 If a manager selects View Products for Sale, the app should list every available item: the item IDs, names, prices, and quantities.
@@ -63,7 +64,8 @@ function managersView () {
                         // Log all results of the SELECT statement
                         console.log('########################\n#### ITEMS FOR SALE #### \n########################\n');
                         for (key in res) {
-                            let name = res[key].product_name.toUpperCase();
+                            let name = res[key].product_name;
+                            productArr.push(name);
                             console.log(`${name} | price: $${res[key].price} | quantity: ${res[key].stock_quantity} | department: ${res[key].department_name} \n`);
                         }
                         console.log('########################\n');
@@ -88,7 +90,8 @@ function managersView () {
                         // Log all results of the SELECT statement
                         console.log('#########################################\n#### ITEMS WITH QUANTITY LESS THAN 5 #### \n#########################################\n');
                         for (key in res) {
-                            let name = res[key].product_name.toUpperCase();
+                            let name = res[key].product_name;
+                            productArr.push(name);
                             console.log(`${name} | price: $${res[key].price} | quantity: ${res[key].stock_quantity} | department: ${res[key].department_name} \n`);
                         }
                         console.log('########################\n');
@@ -106,67 +109,77 @@ function managersView () {
             
             if (answer.action === "Add to Inventory") {
                 inquirer.prompt([
+                    // prompt user for input
+
                     {
-                       type: "list",
-                       name: "product",
-                       message: "Which product would you like add inventory?",
-                       choices: ['flux capacitors','nimbus 2000', 'vibranium disks','infinity stones', 'light sabers', 'warp drive cores', 'squatch repellent','carbonite solos','aladdin lamps','3 headed dog food']
+                        
+                    type: "input",
+                    name: "product",
+                    message: "Please 'View Products', and consult the list in order to enter a product for inventory update:\n"
+                
                     } 
                 
                     // promise for the initial list of options
                     ]).then((answer) => {
-                        console.log('you selected', answer.product); 
-                        // prompt for number to purchase
-                        inquirer.prompt([
-                        {
-                            type: "text",
-                            name: "number",
-                            message: "how many would you like to add?",
-                            validate: function(value) {
-                                if (isNaN(value) === false) {
-                                return true;
-                                }
-                                console.log('\nplease enter a number')
-                                return false;
-                            } // end validation
-                        } 
-                        ]).then((answer2) => {
+                        console.log('you entered', answer.product); 
+                        var n = productArr.includes(answer.product);
+                        if (n === false) {
+                            console.log('please enter a valid product');
+                            managersView();
+                        } else {
+                        // prompt for update of inventory
+                            inquirer.prompt([
+                            {
+                                type: "text",
+                                name: "number",
+                                message: "how many would you like to add?",
+                                validate: function(value) {
+                                    if (isNaN(value) === false) {
+                                    return true;
+                                    }
+                                    console.log('\nplease enter a number')
+                                    return false;
+                                } // end validation
+                            } 
+                            ]).then((answer2) => {
                             
-                            console.log('finding product\n');
-                            let sqlP = 'select stock_quantity from products where ?';
-                            let input = {product_name: answer.product};
-                            connection.query(sqlP, input,(err, results) => {
-                                if(err) {
-                                    throw err;
-                                } else {
-                                    for (key in results) {
-                                        quantity = results[key].stock_quantity;
-                                    } // end loop
-                                } // end condtional
-                                
-                                // add the update to current quantity in stock
-                                answer2.number = parseInt(answer2.number);
-                                var updatedQuantity = answer2.number + quantity;
-
-
-                                // update quantity in database
-                                let sqlU = 'update products set ? where ?;';
-                                let input1 = {stock_quantity: updatedQuantity};
-                                let input2 = {product_name: answer.product};
-                                connection.query(sqlU,[input1, input2],(err, results) => {
+                                console.log('finding product\n');
+                                let sqlP = 'select stock_quantity from products where ?';
+                                let input = {product_name: answer.product};
+                                connection.query(sqlP, input,(err, results) => {
                                     if(err) {
                                         throw err;
                                     } else {
-                                        //capture quantity in stock
-                                        console.log(`${answer2.number} added, update successful\n\n`);
-                                        managersView();
-                                    } // end conditonal
+                                        for (key in results) {
+                                            quantity = results[key].stock_quantity;
+                                        } // end loop
+                                    } // end condtional
+                                    
+                                    // add the update to current quantity in stock
+                                    answer2.number = parseInt(answer2.number);
+                                    var updatedQuantity = answer2.number + quantity;
 
-                                }); // end inventory update query
-    
-                            }); // end inventory select query
 
-                        }); // end inner inventory promise
+                                    // update quantity in database
+                                    let sqlU = 'update products set ? where ?;';
+                                    let input1 = {stock_quantity: updatedQuantity};
+                                    let input2 = {product_name: answer.product};
+                                    connection.query(sqlU,[input1, input2],(err, results) => {
+                                        if(err) {
+                                            throw err;
+                                        } else {
+                                            //capture quantity in stock
+                                            console.log(`${answer2.number} added, update successful\n\n`);
+                                            managersView();
+                                        } // end conditonal
+
+                                    }); // end inventory update query
+        
+                                }); // end inventory select query
+
+                            }); // end inner inventory promise
+
+                        } // end user input validation
 
                     }); // end outer inventory promise
 
