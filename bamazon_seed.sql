@@ -18,7 +18,13 @@ insert into products (product_name, department_name, price, stock_quantity) valu
 insert into products (product_name, department_name, price, stock_quantity) values ('inifinity stones', 'fine jewelery', '20000.00', 6);
 insert into products (product_name, department_name, price, stock_quantity) values ('light sabers', 'home defense', '575.00', 30);
 insert into products (product_name, department_name, price, stock_quantity) values ('warp drive cores', 'electrical', '120.00', 15);
-insert into products (product_name, department_name, price, stock_quantity) values ('squtach repellent', 'sporting goods', '5.00', 1000);
+insert into products (product_name, department_name, price, stock_quantity) values ('squatch repellent', 'sporting goods', '5.00', 1000);
 insert into products (product_name, department_name, price, stock_quantity) values ('carbonite solos', 'home decor', '5500.00', 1);
 insert into products (product_name, department_name, price, stock_quantity) values ('aladdin lamp', 'kitchen appliances', '50.00', 75);
 insert into products (product_name, department_name, price, stock_quantity) values ('3 headed dog food', 'pet supplies', '35.00', 200);
+
+select * from products;
+
+select * from products where product_name='carbonite solos';
+
+select stock_quantity from products where product_name='squatch repellent';
